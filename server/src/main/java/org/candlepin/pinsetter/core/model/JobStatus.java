@@ -116,7 +116,7 @@ public class JobStatus extends AbstractHibernateObject {
     private String correlationId;
 
     @Column(length = 255)
-    private Class<? extends KingpinJob> jobClass;
+    private String jobClass;
 
     private byte[] resultData;
 
@@ -137,7 +137,7 @@ public class JobStatus extends AbstractHibernateObject {
         this.targetType = getTargetType(jobDetail);
         this.targetId = getTargetId(jobDetail);
         this.principalName = getPrincipalName(jobDetail);
-        this.jobClass = getJobClass(jobDetail);
+        this.jobClass = jobDetail.getJobClass().getCanonicalName();
         this.correlationId = getCorrelationId(jobDetail);
     }
 
@@ -163,10 +163,10 @@ public class JobStatus extends AbstractHibernateObject {
         return (String) jobDetail.getJobDataMap().get(CORRELATION_ID);
     }
 
-    @SuppressWarnings("unchecked")
-    private Class<? extends KingpinJob> getJobClass(JobDetail jobDetail) {
-        return (Class<? extends KingpinJob>) jobDetail.getJobClass();
-    }
+//    @SuppressWarnings("unchecked")
+//    private Class<? extends KingpinJob> getJobClass(JobDetail jobDetail) {
+//        return (Class<? extends KingpinJob>) jobDetail.getJobClass();
+//    }
 
     public void update(JobExecutionContext context) {
         this.startTime = context.getFireTime();

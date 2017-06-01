@@ -166,6 +166,7 @@ public class PinsetterKernel implements ModeChangeListener {
      * @param conf Configuration object containing config values.
      */
     private void configure() {
+        log.info("Configuring pinsetter...")
         if (log.isDebugEnabled()) {
             log.debug("Scheduling tasks");
         }
@@ -202,9 +203,13 @@ public class PinsetterKernel implements ModeChangeListener {
              * at classpath, Hence any attempt at fetching the JobDetail by the
              * Scheduler or JobStatus by the JobCurator will fail.
              */
+            log.info("Found job keys: {}", jobKeys.size());
             for (JobKey jobKey : jobKeys) {
+                log.info("Checking for deleted jobs for job key: {}", jobKey);
                 for (String deletedJob : DELETED_JOBS) {
+                    log.info("Checking for deleted job: {}", deletedJob);
                     if (jobKey.getName().contains(deletedJob)) {
+                        log.info("Cleaning up deleted jobs for job key: {}", jobKey);
                         scheduler.deleteJob(jobKey);
                         jobCurator.deleteJobNoStatusReturn(jobKey.getName());
                         break;
