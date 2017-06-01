@@ -74,7 +74,8 @@ public class PinsetterKernel implements ModeChangeListener {
     public static final String SINGLE_JOB_GROUP = "async group";
     public static final String[] DELETED_JOBS = new String[] {
         "StatisticHistoryTask",
-        "ExportCleaner"
+        "ExportCleaner",
+        "populated_hosted_db"
     };
 
     private static Logger log = LoggerFactory.getLogger(PinsetterKernel.class);
