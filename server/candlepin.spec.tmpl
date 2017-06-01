@@ -20,7 +20,7 @@
 %endif
 
 Name: candlepin
-Version: 2.0.35
+Version: 2.0.35.2
 Release: 1%{?dist}
 #if $epoch
 Epoch: $epoch
@@ -226,6 +226,14 @@ fi
 
 #raw
 %changelog
+* Thu Jun 01 2017 Michael Stead <mstead@redhat.com> 2.0.35.2-1
+- Messing with logging and removing the Class in JobStatus (mstead@redhat.com)
+- 1457905: Added PopulateHostedDBTask job to DELETED_JOBS (mstead@redhat.com)
+
+* Thu Jun 01 2017 Michael Stead <mstead@redhat.com> 2.0.35.1-1
+- Messing with logging and removing the Class in JobStatus (mstead@redhat.com)
+- 1457905: Added PopulateHostedDBTask job to DELETED_JOBS (mstead@redhat.com)
+
 * Fri May 26 2017 Kevin Howell <khowell@redhat.com> 2.0.35-1
 - 1452330: Refresh no longer removes locally-managed pools (crog@redhat.com)
 - Fixed a few issues involving source subscriptions (crog@redhat.com)
