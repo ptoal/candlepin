@@ -18,6 +18,7 @@ package org.candlepin.pinsetter.core;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.JobKey.jobKey;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
 import static org.quartz.impl.matchers.GroupMatcher.jobGroupEquals;
@@ -404,7 +405,10 @@ public class PinsetterKernel implements ModeChangeListener {
             // this deletes from the scheduler, it's already marked as
             // canceled in the JobStatus table
             if (scheduler.deleteJob(jobKey((String) id, group))) {
-                log.info("canceled job " + group + ":" + id + " in scheduler");
+                log.info("Canceled job {}:{} in scheduler", group, id);
+            }
+            else {
+                log.warn("Schedular failed to delete the job {}:{}", group, id);
             }
         }
         catch (SchedulerException e) {
@@ -413,7 +417,8 @@ public class PinsetterKernel implements ModeChangeListener {
     }
 
     /**
-     * Schedule a long-running job for a single execution.
+     * Schedule a long-running job for a single execution. All async jobs will be scheduled
+     * with a higher priority than cron jobs.
      *
      * @param jobDetail the long-running job to perform - assumed to be
      *     prepopulated with a valid job task and name
@@ -421,13 +426,28 @@ public class PinsetterKernel implements ModeChangeListener {
      * @throws PinsetterException if there is an error scheduling the job
      */
     public JobStatus scheduleSingleJob(JobDetail jobDetail) throws PinsetterException {
+        log.debug("Scheduling Async Job (priority 100): {}", jobDetail.getKey().getName());
         Trigger trigger = newTrigger()
             .withIdentity(jobDetail.getKey().getName() + " trigger", SINGLE_JOB_GROUP)
+            .withSchedule(simpleSchedule().withMisfireHandlingInstructionFireNow())
+            .startNow()
+            .withPriority(100)
             .build();
 
         return scheduleJob(jobDetail, SINGLE_JOB_GROUP, trigger);
     }
 
+    /**
+     * Fires a cron job a single time.
+     *
+     * @param job the job class to run.
+     * @param jobName the name of the job.
+     * @return the JobStatus of the job.
+     * @throws PinsetterException if there is an error scheduling the job.
+     */
+    // FIXME This method does not limit firing of a 'Cron' job. Its caller does.
+    // FIXME The job group is set to CRON_GROUP, but does this make sense.
+    //       This is not different than an async job.
     public JobStatus scheduleSingleJob(Class job, String jobName) throws PinsetterException {
         JobDataMap map = new JobDataMap();
         map.put(PinsetterJobListener.PRINCIPAL_KEY, new SystemPrincipal());

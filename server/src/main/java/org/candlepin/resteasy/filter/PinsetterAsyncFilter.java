@@ -91,7 +91,7 @@ public class PinsetterAsyncFilter implements PostProcessInterceptor {
             return this.pinsetterKernel.scheduleSingleJob(detail);
         }
         catch (PinsetterException e) {
-            throw new ServiceUnavailableException("Error scheduling refresh job.", e);
+            throw new ServiceUnavailableException("Error scheduling job.", e);
         }
     }
 
