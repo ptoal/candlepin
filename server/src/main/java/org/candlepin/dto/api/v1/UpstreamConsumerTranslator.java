@@ -15,8 +15,6 @@
 package org.candlepin.dto.api.v1;
 
 import org.candlepin.dto.ModelTranslator;
-import org.candlepin.model.Certificate;
-import org.candlepin.model.ConsumerType;
 import org.candlepin.model.UpstreamConsumer;
 
 
@@ -67,12 +65,12 @@ public class UpstreamConsumerTranslator extends
         dest.setOwnerId(source.getOwnerId());
         dest.setApiUrl(source.getApiUrl());
         dest.setWebUrl(source.getWebUrl());
+        dest.setContentAccessMode(source.getContentAccessMode());
 
         // Process nested objects if we have a ModelTranslator to use to the translation...
         if (translator != null) {
-            dest.setConsumerType(translator.<ConsumerType, ConsumerTypeDTO>translate(source.getType()));
-            dest.setIdentityCertificate(
-                translator.<Certificate, CertificateDTO>translate((Certificate) source.getIdCert()));
+            dest.setConsumerType(translator.translate(source.getType(), ConsumerTypeDTO.class));
+            dest.setIdentityCertificate(translator.translate(source.getIdCert(), CertificateDTO.class));
         }
         else {
             dest.setConsumerType(null);

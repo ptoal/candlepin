@@ -35,8 +35,8 @@ import org.candlepin.controller.CandlepinPoolManager;
 import org.candlepin.controller.ModeManager;
 import org.candlepin.controller.ModeManagerImpl;
 import org.candlepin.controller.PoolManager;
-import org.candlepin.dto.api.APIModelTranslator;
-import org.candlepin.dto.api.v1.APIv1ModelTranslator;
+import org.candlepin.dto.ModelTranslator;
+import org.candlepin.dto.StandardTranslator;
 import org.candlepin.guice.CandlepinRequestScope;
 import org.candlepin.guice.CandlepinRequestScoped;
 import org.candlepin.guice.I18nProvider;
@@ -292,8 +292,7 @@ public class TestingModules {
             bind(OwnerServiceAdapter.class).to(DefaultOwnerServiceAdapter.class);
             bind(EntitlementCertServiceAdapter.class).to(StubEntitlementCertServiceAdapter.class);
             bind(ManifestFileService.class).to(DBManifestService.class);
-            bind(ContentAccessCertServiceAdapter.class).to(
-                DefaultContentAccessCertServiceAdapter.class);
+            bind(ContentAccessCertServiceAdapter.class).to(DefaultContentAccessCertServiceAdapter.class);
             bind(ScriptEngineProvider.class);
 
             bind(JobFactory.class).to(GuiceJobFactory.class);
@@ -337,7 +336,8 @@ public class TestingModules {
             install(new FactoryModuleBuilder().build(BindContextFactory.class));
             install(new FactoryModuleBuilder().build(PreEntitlementRulesCheckOpFactory.class));
 
-            bind(APIModelTranslator.class).to(APIv1ModelTranslator.class);
+            // Bind model translator
+            bind(ModelTranslator.class).toInstance(new StandardTranslator());
         }
     }
 }
