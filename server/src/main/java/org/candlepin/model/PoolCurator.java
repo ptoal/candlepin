@@ -16,6 +16,7 @@ package org.candlepin.model;
 
 import org.candlepin.common.paging.Page;
 import org.candlepin.common.paging.PageRequest;
+import org.candlepin.config.DatabaseConfigFactory;
 import org.candlepin.model.Pool.PoolType;
 import org.candlepin.model.activationkeys.ActivationKey;
 import org.candlepin.model.activationkeys.ActivationKeyPool;
@@ -159,31 +160,28 @@ public class PoolCurator extends AbstractHibernateCurator<Pool> {
             return new ArrayList<Pool>();
         }
 
-        List<Pool> results = createSecureCriteria()
-            .add(CPRestrictions.in("sourceEntitlement", ents))
-            .setFetchMode("entitlements", FetchMode.JOIN)
-            .list();
-
-        if (results == null) {
-            results = new LinkedList<Pool>();
+        List<Pool> results = new LinkedList<Pool>();
+        Iterable<List<Entitlement>> blocks = Iterables.partition(ents, config.getInt(DatabaseConfigFactory.QUERY_PARAMETER_LIMIT));
+        for (List<Entitlement> block : blocks) {
+            results.addAll(createSecureCriteria().add(CPRestrictions.in("sourceEntitlement", block)).list());
         }
-
-        if (results.size() > 0) {
-            List<Pool> pools = listBySourceEntitlements(convertPoolsToEntitlements(results));
-            results.addAll(pools);
-        }
+        results.addAll(findDependantPoolsBySource(results));
 
         return results;
     }
 
-    private List<Entitlement> convertPoolsToEntitlements(List<Pool> pools) {
-        List<Entitlement> result = new ArrayList<Entitlement>();
-
-        for (Pool p : pools) {
-            result.addAll(p.getEntitlements());
+    private List<Pool> findDependantPoolsBySource(List<Pool> pools) {
+        List<Pool> results = new LinkedList<Pool>();
+        if (!pools.isEmpty()) {
+            String sql = "from Pool dep_pool join dep_pool.sourceEntitlement e join e.pool pool " +
+                        "where pool in (:target_pools) and dep_pool not in (:target_pools)";
+            List<Pool> found = getEntityManager().createQuery(sql).setParameter("target_pools", pools).getResultList();
+            results.addAll(found);
+            if (!found.isEmpty()) {
+                results.addAll(findDependantPoolsBySource(found));
+            }
         }
-
-        return result;
+        return results;
     }
 
     /**

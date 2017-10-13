@@ -2292,6 +2292,6 @@ public class CandlepinPoolManager implements PoolManager {
         // pool is non-custom  -- however we decide to implement that in the future.
 
         return pool != null && pool.getSourceSubscription() != null && !pool.getType().isDerivedType() &&
-            (pool.getUpstreamPoolId() != null || !this.config.getBoolean(ConfigProperties.STANDALONE, true));
+                (pool.getAccountNumber() != null || !this.config.getBoolean(ConfigProperties.STANDALONE, true));
     }
 }
