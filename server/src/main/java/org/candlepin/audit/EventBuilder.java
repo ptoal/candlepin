@@ -76,7 +76,6 @@ public class EventBuilder {
                     }
                 }
             }
-            factory.entityToJson(entity);
         }
         return this;
     }
